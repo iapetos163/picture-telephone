@@ -1,0 +1,14 @@
+@import "~bootswatch/dist/cyborg/variables";
+@import 'bootstrap';
+@import "~bootswatch/dist/cyborg/bootswatch";
+
+#error {
+  display: none;
+  position: fixed;
+  color: $danger;
+  z-index: 1;
+}
+
+.hidden {
+  display: none;
+}
