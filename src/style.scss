@@ -2,6 +2,9 @@
 @import 'bootstrap';
 @import "~bootswatch/dist/cyborg/bootswatch";
 
+$nav-height: 50px;
+$sm-canvas-container: 280px;
+
 #error {
   display: none;
   position: fixed;
@@ -10,5 +13,95 @@
 }
 
 .hidden {
-  display: none;
+  display: none !important;
+}
+
+.box-btn {
+  border: none;
+  background: darkgoldenrod;
+  flex: $sm-canvas-container / 7;
+  width: $sm-canvas-container / 7;
+}
+
+nav {
+  background: darkgray;
+  height: $nav-height;
+  position: absolute;
+  width: 100%;
+}
+
+main {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  padding-top: $nav-height;
+  display: flex;
+  justify-content: center;
+}
+
+#game-container {
+  max-width: 700px;
+  max-height: 700px;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+}
+
+#show-and-tell, #create-phase {
+  display: flex;
+  flex-direction: column-reverse;
+  height: 100%;
+
+  > div {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    flex: 3 $sm-canvas-container;
+  }
+
+  > div.btn-container {
+    flex: 1 50px;
+    margin: auto;
+  }
+}
+
+#canvas-container, #text-container {
+  max-height: $sm-canvas-container;
+  flex: 1;
+  display: flex;
+}
+
+#text-container {
+  justify-items: center;
+  flex-direction: column;
+
+  textarea {
+    width: 60%;
+    flex-basis: 6em;
+    margin: auto;
+  }
+}
+
+#canvas-container {
+  justify-items: flex-end;
+
+  >div#inner-canvas-container {
+    display: flex;
+    justify-content: center;
+    height: 250px;
+    flex: 1;
+    margin: auto;
+
+    canvas {
+      height: 250px;
+      width: 350px;
+    }
+  }
+  
+  >div#right-bar {
+    display: flex;
+    width: $sm-canvas-container * 2 / 7;
+    flex-flow: column wrap;
+    height: 100%;
+  }
 }

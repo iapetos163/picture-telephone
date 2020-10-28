@@ -15,31 +15,57 @@
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-
-        <main class="container-fluid">
+        <header>
+            <nav></nav>
+        </header>
+        <main>
             <p id="error"></p>
-            <div id="create-phase">
-                <div class="row">
-                    <div id="canvas-container" class="col-xs-12 hidden">
-                        <canvas></canvas>
+            <div id="game-container">
+                <div id="create-phase">
+                    <div class="btn-container">
+                        <div>
+                            <button id="done-btn" class="btn btn-primary">Done</button>
+                        </div>
                     </div>
-                    <div id="text-container" class="col-xs-12">
-                        <textarea></textarea>
+                    <div>
+                        <div id="canvas-container" class="hidden">
+                                <div></div>
+                                <div id="inner-canvas-container">
+                                    <div>
+                                        <canvas width="350" height="250"></canvas>
+                                    </div>
+                                </div>
+                                <div id="right-bar" class="hidden">
+                                    <div class="box-btn">1</div>
+                                    <div class="box-btn">2</div>
+                                    <div class="box-btn">3</div>
+                                    <div class="box-btn">4</div>
+                                    <div class="box-btn">5</div>
+                                    <div class="box-btn">6</div>
+                                    <div class="box-btn">Pick</div>
+                                    <div class="box-btn">Fill</div>
+                                    <div class="box-btn">Und</div>
+                                    <div class="box-btn">Clr</div>
+                                    <div class="box-btn">Lg</div>
+                                    <div class="box-btn">Med</div>
+                                    <div class="box-btn">Sm</div>
+                                    <div class="box-btn">?</div>
+                                </div>
+                        </div>
+                        <div id="text-container">
+                            <div></div>
+                            <textarea placeholder="Enter a prompt!"></textarea>
+                        </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-4 offset-sm-4">
-                        <button id="done-btn" class="btn btn-primary">Done</button>
+                <div id="show-and-tell" class="hidden">
+                    <div class="btn-container">
+                        <div>
+                            <button id="next-btn" class="btn btn-primary">Next</button>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div id="show-and-tell" class="hidden">
-                <div class="row">
-                    <div id="showcase"></div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-4 offset-sm-4">
-                        <button id="next-btn" class="btn btn-primary">Next</button>
+                    <div>
+                        <div id="showcase"></div>
                     </div>
                 </div>
             </div>

@@ -1,28 +1,32 @@
 import { handleError } from './main';
 import { getRoundType, nextRound, Phase, submitPicture, submitText } from './game-state';
 
-const width = 400; // document.body.clientWidth;
-const height = 300;
 let ctx: CanvasRenderingContext2D;
 let textContainer: HTMLElement, canvasContainer: HTMLElement,
     createContainer: HTMLElement, showAndTellContainer: HTMLElement,
     showcase: HTMLElement;
 let textArea: HTMLTextAreaElement;
 let drawing = false;
+let rect: DOMRect;
+let windowRect: DOMRect
 
 function onMouseDown(evt: MouseEvent) {
+  rect = (evt.target as Element).getBoundingClientRect();
+  console.log(rect);
   drawing = true;
   ctx.beginPath();
-  ctx.moveTo(evt.clientX, evt.clientY);
+  ctx.moveTo(evt.clientX - rect.left, evt.clientY - rect.top);
+  console.log(evt)
   window.addEventListener('mousemove', onMouseMove as EventListener);
 }
 
 function onTouchStart(evt: TouchEvent) {
+  rect = (evt.target as Element).getBoundingClientRect();
   evt.preventDefault();
   const touch = evt.changedTouches[0];
   drawing = true;
   ctx.beginPath();
-  ctx.moveTo(touch.clientX, touch.clientY);
+  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
   window.addEventListener('touchmove', onTouchMove);
 }
 
@@ -37,12 +41,13 @@ function onTouchEnd(evt: TouchEvent) {
 }
 
 function onMouseMove(evt: MouseEvent) {
-  ctx.lineTo(evt.clientX, evt.clientY);
+  console.log(evt)
+  ctx.lineTo(evt.clientX - rect.left, evt.clientY - rect.top);
 }
 
 function onTouchMove(evt: TouchEvent) {
   const touch = evt.changedTouches[0];
-  ctx.lineTo(touch.clientX, touch.clientY);
+  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
 }
 
 function draw() {
@@ -56,8 +61,6 @@ export function initialize() {
   if (canvas === null) {
     throw new Error('Failed to find canvas');
   }
-  canvas.style.width = `${width}px`;
-  canvas.style.width = `${height}px`;
 
   const context = canvas.getContext('2d');
   if (context === null) {
@@ -123,7 +126,7 @@ export function initialize() {
 
 function clearCanvas() {
   ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, 1000, 1000);
 }
 
 function clearText() {
