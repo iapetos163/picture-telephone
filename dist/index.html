@@ -16,15 +16,24 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
         <header>
-            <nav></nav>
+            <nav>
+                <p id="lobby-count"></p>
+            </nav>
         </header>
         <main>
             <p id="error"></p>
             <div id="game-container">
-                <div id="create-phase">
+                <div id="lobby">
+                    <button id="start-btn" class="btn btn-lg btn-success">Start Game</button>
+                </div>
+                <div id="loading" class="hidden">
+                    <p>Loading...</p>
+                </div>
+                <div id="create-phase" class="hidden">
                     <div class="btn-container">
                         <div>
                             <button id="done-btn" class="btn btn-primary">Done</button>
+                            <p id="waiting" class="hidden">Waiting for other players...</p>
                         </div>
                     </div>
                     <div>

@@ -17,8 +17,8 @@ export function handleError(message: string | Error | ErrorEvent) {
 document.addEventListener('DOMContentLoaded', () => {
   errorElem = document.getElementById('error') as HTMLElement;
   try {
-    initializeGameState();
     initializeUI();
+    initializeGameState();
   } catch (err) {
     handleError(err);
   }

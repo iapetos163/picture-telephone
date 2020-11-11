@@ -1,10 +1,11 @@
 import { handleError } from './main';
-import { getRoundType, nextRound, Phase, submitPicture, submitText } from './game-state';
+import { getRoundType, Phase, submitPicture, submitText, startGame, showNext, submitOwnPicture, submitOwnText } from './game-state';
 
 let ctx: CanvasRenderingContext2D;
 let textContainer: HTMLElement, canvasContainer: HTMLElement,
     createContainer: HTMLElement, showAndTellContainer: HTMLElement,
-    showcase: HTMLElement;
+    showcase: HTMLElement, lobbyCount: HTMLElement, lobby: HTMLElement,
+    loading: HTMLElement, waiting: HTMLElement, doneButton: HTMLElement;
 let textArea: HTMLTextAreaElement;
 let drawing = false;
 let rect: DOMRect;
@@ -12,11 +13,9 @@ let windowRect: DOMRect
 
 function onMouseDown(evt: MouseEvent) {
   rect = (evt.target as Element).getBoundingClientRect();
-  console.log(rect);
   drawing = true;
   ctx.beginPath();
   ctx.moveTo(evt.clientX - rect.left, evt.clientY - rect.top);
-  console.log(evt)
   window.addEventListener('mousemove', onMouseMove as EventListener);
 }
 
@@ -41,7 +40,6 @@ function onTouchEnd(evt: TouchEvent) {
 }
 
 function onMouseMove(evt: MouseEvent) {
-  console.log(evt)
   ctx.lineTo(evt.clientX - rect.left, evt.clientY - rect.top);
 }
 
@@ -73,9 +71,14 @@ export function initialize() {
   const createContainerElem = document.getElementById('create-phase');
   const showAndTellElem = document.getElementById('show-and-tell');
   const showcaseElem = document.getElementById('showcase');
+  const lobbyCountElem = document.getElementById('lobby-count');
+  const lobbyElem = document.getElementById('lobby');
+  const loadingElem = document.getElementById('loading');
+  const waitingElem = document.getElementById('waiting');
   if (textContainerElem === null || canvasContainerElem === null
       || createContainerElem === null || showAndTellElem === null
-      || showcaseElem === null) {
+      || showcaseElem === null || lobbyCountElem === null
+      || lobbyElem === null || loadingElem === null || waitingElem === null) {
     throw new Error('Failed to get a container');
   }
   canvasContainer = canvasContainerElem;
@@ -83,6 +86,10 @@ export function initialize() {
   createContainer = createContainerElem;
   showAndTellContainer = showAndTellElem;
   showcase = showcaseElem;
+  lobbyCount = lobbyCountElem;
+  lobby = lobbyElem;
+  loading = loadingElem;
+  waiting = waitingElem;
 
   const textAreaElem = textContainer.querySelector<HTMLTextAreaElement>('textarea');
   if (textAreaElem === null) {
@@ -90,24 +97,26 @@ export function initialize() {
   }
   textArea = textAreaElem;
 
-  const doneButton = document.getElementById('done-btn');
+  const doneButtonElem = document.getElementById('done-btn');
   const nextButton = document.getElementById('next-btn');
-  if (doneButton === null || nextButton === null) {
-    throw new Error('Failed to get #done-btn or #next-btn');
+  const startButton = document.getElementById('start-btn');
+  if (doneButtonElem === null || nextButton === null || startButton === null) {
+    throw new Error('Failed to get #done-btn, #next-btn, or #start-btn');
   }
+  doneButton = doneButtonElem;
   doneButton.addEventListener('click', () => {
     if(getRoundType() === 'PICTURE') {
-      submitPicture(0, canvas.toDataURL());
+      submitOwnPicture(canvas.toDataURL());
       clearCanvas();
     } else {
-      submitText(0, textAreaElem.value);
+      submitOwnText(textAreaElem.value);
       clearText();
     }
-
-    nextRound();
   });
   
-  nextButton.addEventListener('click', nextRound);
+  nextButton.addEventListener('click', showNext);
+
+  startButton.addEventListener('click', startGame);
 
   canvas.addEventListener('mousedown', onMouseDown);
   canvas.addEventListener('touchstart', onTouchStart);
@@ -145,13 +154,30 @@ export function showTextArea() {
 }
 
 export function displayPhase(phase: Phase) {
-  if (phase === 'CREATE') {
-    createContainer.classList.remove('hidden');
-    showAndTellContainer.classList.add('hidden');
-  } else {
-    showAndTellContainer.classList.remove('hidden');
-    createContainer.classList.add('hidden');
+  createContainer.classList.add('hidden');
+  showAndTellContainer.classList.add('hidden');
+  loading.classList.add('hidden');
+  lobby.classList.add('hidden');
+  lobbyCount.classList.add('hidden');
+  switch(phase) {
+    case 'CREATE':
+      createContainer.classList.remove('hidden');
+      break;
+    case 'SHOW':
+      showAndTellContainer.classList.remove('hidden');
+      break;
+    case 'LOBBY':
+      lobby.classList.remove('hidden');
+      lobbyCount.classList.add('hidden');
+      break;
+    case 'LOADING':
+      loading.classList.remove('hidden');
+      break;
+    default:
+      throw new Error(`Phase ${phase} not implemented`);
   }
+  
+  lobby.classList.add('hidden');
 }
 
 export function showcasePicture(source: string) {
@@ -170,4 +196,18 @@ export function showcaseText(text: string) {
   const para = document.createElement('p');
   para.innerText = text;
   showcase.appendChild(para);
+}
+
+export function setLobbyCount(count: number) {
+  lobbyCount.innerText = `${count} Player${count === 1 ? '' : 's'} in Lobby`;
+}
+
+export function showWaiting() {
+  waiting.classList.remove('hidden');
+  doneButton.classList.add('hidden');
+}
+
+export function showDoneButton() {
+  waiting.classList.add('hidden');
+  doneButton.classList.remove('hidden');
 }
