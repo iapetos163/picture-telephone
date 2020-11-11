@@ -1,6 +1,6 @@
 
 import { mockNextRound } from '.';
-import { displayPhase, showCanvas, showcasePicture, showcaseText, showDoneButton, showTextArea, showWaiting } from '../ui';
+import { clearShowcase, displayPhase, showCanvas, showcasePicture, showcaseText, showDoneButton, showTextArea, showWaiting } from '../ui';
 
 export type RoundType = 'TEXT' | 'PICTURE';
 export type Phase = 'CREATE' | 'SHOW';
@@ -38,18 +38,14 @@ export default class Session {
   }
 
   public submitOwnText(text: string) {
-    console.log('called submitOwnText')
     this.waiting = true;
     showWaiting();
     this.submitText(this.playerID, text);
   }
 
   public submitText(player: number, text: string) {
-    console.log('-----')
-    console.log(this.numRounds)
     this.texts[this.round / 2][this.roundPaths[this.round][player]] = text;
     for (let i = 0; i < this.numRounds ; i++) {
-      console.log('text', this.texts[this.round / 2][i])
       if(this.texts[this.round / 2][i] == undefined) {
         return;
       }
@@ -78,7 +74,6 @@ export default class Session {
   public nextRound() {
     this.waiting = false;
     showDoneButton();
-    console.log('invoked showDoneButton');
     if (this.phase === 'CREATE') {
       if (++this.round === this.numRounds) {
         this.round = 0;
@@ -87,13 +82,22 @@ export default class Session {
         this.phase = 'SHOW';
         displayPhase('SHOW');
       } else if (this.round % 2 === 0) {
-        showTextArea();
+        if (this.round > 0) {
+          showTextArea(this.pictures[(this.round - 2) / 2][this.roundPaths[this.round][this.playerID]]);
+        } else {
+          showTextArea();
+        }
       } else {
-        showCanvas();
+        if (this.round > 0) {
+          showCanvas(this.texts[(this.round - 1) / 2][this.roundPaths[this.round][this.playerID]]);
+        } else {
+          showCanvas();
+        }
       }
     } else {
       if (++this.round === this.numRounds) {
         this.round = 0;
+        clearShowcase();
         if (++this.showingPath===this.numRounds) {
           showTextArea();
           this.phase = 'CREATE';

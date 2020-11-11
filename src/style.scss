@@ -3,7 +3,7 @@
 @import "~bootswatch/dist/cyborg/bootswatch";
 
 $nav-height: 50px;
-$sm-canvas-container: 280px;
+$sm-inner-canvas-container: 280px;
 
 #error {
   display: none;
@@ -19,8 +19,8 @@ $sm-canvas-container: 280px;
 .box-btn {
   border: none;
   background: darkgoldenrod;
-  flex: $sm-canvas-container / 7;
-  width: $sm-canvas-container / 7;
+  flex: $sm-inner-canvas-container / 7;
+  width: $sm-inner-canvas-container / 7;
 }
 
 nav {
@@ -57,7 +57,7 @@ main {
     display: flex;
     justify-content: center;
     flex-direction: column;
-    flex: 3 $sm-canvas-container;
+    flex: 3 $sm-inner-canvas-container;
   }
 
   > div.btn-container {
@@ -66,8 +66,8 @@ main {
   }
 }
 
-#canvas-container, #text-container {
-  max-height: $sm-canvas-container;
+#inner-canvas-container, #text-container {
+  max-height: $sm-inner-canvas-container;
   flex: 1;
   display: flex;
 }
@@ -83,10 +83,10 @@ main {
   }
 }
 
-#canvas-container {
+#inner-canvas-container {
   justify-items: flex-end;
 
-  >div#inner-canvas-container {
+  >div#inner-inner-canvas-container {
     display: flex;
     justify-content: center;
     height: 250px;
@@ -101,8 +101,12 @@ main {
   
   >div#right-bar {
     display: flex;
-    width: $sm-canvas-container * 2 / 7;
+    width: $sm-inner-canvas-container * 2 / 7;
     flex-flow: column wrap;
     height: 100%;
   }
+}
+
+#showcase-container {
+  overflow-y: scroll;
 }

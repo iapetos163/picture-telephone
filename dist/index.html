@@ -38,8 +38,10 @@
                     </div>
                     <div>
                         <div id="canvas-container" class="hidden">
+                            <p id="prev-text"></p>
+                            <div id="inner-canvas-container">
                                 <div></div>
-                                <div id="inner-canvas-container">
+                                <div id="inner-inner-canvas-container">
                                     <div>
                                         <canvas width="350" height="250"></canvas>
                                     </div>
@@ -60,11 +62,13 @@
                                     <div class="box-btn">Sm</div>
                                     <div class="box-btn">?</div>
                                 </div>
+                            </div>
                         </div>
                         <div id="text-container">
-                            <div></div>
+                            <div id="prev-picture"></div>
                             <textarea placeholder="Enter a prompt!"></textarea>
                         </div>
+                    </div>
                     </div>
                 </div>
                 <div id="show-and-tell" class="hidden">
@@ -73,7 +77,7 @@
                             <button id="next-btn" class="btn btn-primary">Next</button>
                         </div>
                     </div>
-                    <div>
+                    <div id="showcase-container">
                         <div id="showcase"></div>
                     </div>
                 </div>

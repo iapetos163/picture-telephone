@@ -1,11 +1,12 @@
 import { handleError } from './main';
-import { getRoundType, Phase, submitPicture, submitText, startGame, showNext, submitOwnPicture, submitOwnText } from './game-state';
+import { getRoundType, Phase, startGame, showNext, submitOwnPicture, submitOwnText } from './game-state';
 
 let ctx: CanvasRenderingContext2D;
 let textContainer: HTMLElement, canvasContainer: HTMLElement,
     createContainer: HTMLElement, showAndTellContainer: HTMLElement,
     showcase: HTMLElement, lobbyCount: HTMLElement, lobby: HTMLElement,
-    loading: HTMLElement, waiting: HTMLElement, doneButton: HTMLElement;
+    loading: HTMLElement, waiting: HTMLElement, doneButton: HTMLElement,
+    prevPicture: HTMLElement, prevTextContainer: HTMLElement;
 let textArea: HTMLTextAreaElement;
 let drawing = false;
 let rect: DOMRect;
@@ -75,10 +76,13 @@ export function initialize() {
   const lobbyElem = document.getElementById('lobby');
   const loadingElem = document.getElementById('loading');
   const waitingElem = document.getElementById('waiting');
+  const prevPictureElem = document.getElementById('prev-picture');
+  const prevTextElem = document.getElementById('prev-text');
   if (textContainerElem === null || canvasContainerElem === null
       || createContainerElem === null || showAndTellElem === null
       || showcaseElem === null || lobbyCountElem === null
-      || lobbyElem === null || loadingElem === null || waitingElem === null) {
+      || lobbyElem === null || loadingElem === null || waitingElem === null
+      || prevPictureElem === null || prevTextElem === null) {
     throw new Error('Failed to get a container');
   }
   canvasContainer = canvasContainerElem;
@@ -90,6 +94,8 @@ export function initialize() {
   lobby = lobbyElem;
   loading = loadingElem;
   waiting = waitingElem;
+  prevPicture = prevPictureElem;
+  prevTextContainer = prevTextElem;
 
   const textAreaElem = textContainer.querySelector<HTMLTextAreaElement>('textarea');
   if (textAreaElem === null) {
@@ -142,13 +148,26 @@ function clearText() {
   textArea.value = '';
 }
 
-export function showCanvas() {
+export function showCanvas(prevText?: string) {
+  if (prevText != undefined) {
+    prevTextContainer.innerText = prevText;
+  } else {
+    prevTextContainer.innerText = '';
+  }
   canvasContainer.classList.remove('hidden');
   textContainer.classList.add('hidden');
 }
 
 
-export function showTextArea() {
+export function showTextArea(prevPictureSource?: string) {
+  if (prevPicture.firstChild !== null) {
+    prevPicture.removeChild(prevPicture.firstChild);
+  }
+  if (prevPictureSource != undefined) {
+    const image = document.createElement('img');
+    image.setAttribute('src', prevPictureSource);
+    prevPicture.appendChild(image);
+  }
   textContainer.classList.remove('hidden');
   canvasContainer.classList.add('hidden');
 }
@@ -181,21 +200,21 @@ export function displayPhase(phase: Phase) {
 }
 
 export function showcasePicture(source: string) {
-  if (showcase.firstChild !== null) {
-    showcase.removeChild(showcase.firstChild);
-  }
   const image = document.createElement('img');
   image.setAttribute('src', source);
   showcase.appendChild(image);
 }
 
 export function showcaseText(text: string) {
-  if (showcase.firstChild !== null) {
-    showcase.removeChild(showcase.firstChild);
-  }
   const para = document.createElement('p');
   para.innerText = text;
   showcase.appendChild(para);
+}
+
+export function clearShowcase() {
+  while (showcase.firstChild !== null) {
+    showcase.removeChild(showcase.firstChild);
+  }
 }
 
 export function setLobbyCount(count: number) {
