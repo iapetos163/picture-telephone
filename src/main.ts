@@ -14,11 +14,11 @@ export function handleError(message: string | Error | ErrorEvent) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   errorElem = document.getElementById('error') as HTMLElement;
   try {
     initializeUI();
-    initializeGameState();
+    await initializeGameState();
   } catch (err) {
     handleError(err);
   }

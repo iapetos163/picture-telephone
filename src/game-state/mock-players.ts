@@ -41,7 +41,6 @@ export default class Player {
   }
 
   public static allNextRound() {
-    console.log('invoked all next round');
     if (getPhase() === 'CREATE') {
       for (const player of Player.players) {
         player.nextRound();

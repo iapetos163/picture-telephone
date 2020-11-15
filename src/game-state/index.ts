@@ -1,6 +1,7 @@
 import { displayPhase, setLobbyCount } from "../ui";
+import { joinLobby } from '../adapter';
 import Player from "./mock-players";
-import { joinLobby, startSession } from "./mock-server";
+import { joinLobby as mockJoinLobby, startSession } from "./mock-server";
 import Session from "./Session";
 
 export type RoundType = 'TEXT' | 'PICTURE';
@@ -24,15 +25,15 @@ export function submitOwnText(text: string) {
   currentSession.submitOwnText(text);
 }
 
-export function initialize() {
+export async function initialize() {
   Player.initialize(5);
-  joinLobby(new Date());
+  mockJoinLobby(new Date());
+  await joinLobby();
 }
 
 // UI + session interface
 
 export function showNext() {
-  console.log('invoked showNext');
   // Only for show and tell
   if(currentSession.currentPhase !== 'SHOW') {
     throw new Error('Cannot show next outside of show and tell');
