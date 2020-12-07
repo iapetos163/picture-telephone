@@ -21,7 +21,3 @@ Thumbs.db
 
 # NPM packages folder.
 node_modules/
-
-# Brunch output folder.
-dist/*
-!dist/index.html
