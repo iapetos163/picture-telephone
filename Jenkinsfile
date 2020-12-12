@@ -2,10 +2,18 @@ pipeline {
   agent any
 
   stages {
-    stage('Build') {
+    stage('Build Backend') {
       steps {
         dir('backend') {
           sh 'ln -sf /var/terraform/draw cdktf.out'
+          sh 'yarn'
+          sh 'yarn build'
+        }
+      }
+    }
+    stage('Build Frontend') {
+      steps {
+        dir('frontend') {
           sh 'yarn'
           sh 'yarn build'
         }
@@ -16,6 +24,11 @@ pipeline {
         dir('backend') {
           withAWS(credentials: 'cdk-pipeline-aws-user') {
             sh 'yarn deploy'
+          }
+        }
+        dir('frontend') {
+          withAWS(credentials: 'web-pipeline-aws-user') {
+            s3Upload(file:'dist', bucket:'brett.house', key: "draw/")
           }
         }
       }
