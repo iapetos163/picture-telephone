@@ -28,7 +28,7 @@ pipeline {
         }
         dir('frontend') {
           withAWS(credentials: 'web-pipeline-aws-user') {
-            s3Upload(file:'dist', bucket:'brett.house', key: "draw/")
+            s3Upload(file:'dist', bucket:'brett.house', path: "draw/")
           }
         }
       }
