@@ -1,11 +1,12 @@
-import axios from "axios";
+import axios from 'axios';
+import { DOMAIN_NAME } from './constants.json';
 
 const handle = axios.create({
-  baseURL: 'https://bmioip57lh.execute-api.us-west-2.amazonaws.com',
+  baseURL: `https://${DOMAIN_NAME}`,
 });
 
 export async function joinLobby() {
-  const res = await handle.post('/join');
+  const res = await handle.post('/join-lobby');
   console.log(res.data);
 }
 
