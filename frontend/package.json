@@ -29,7 +29,7 @@
     "popper.js": "^1.16.0"
   },
   "scripts": {
-    "build": "update-consts && webpack",
+    "build": "yarn update-consts && webpack",
     "start": "webpack --watch",
     "update-consts": "cp ../constants.json src/constants.json"
   }
