@@ -6,7 +6,7 @@ const handle = axios.create({
 });
 
 export async function joinLobby() {
-  const res = await handle.post('/join-lobby');
+  const res = await handle.post('/create-room');
   console.log(res.data);
 }
 
