@@ -21,4 +21,5 @@ Thumbs.db
 
 # NPM packages folder.
 node_modules/
-*/src/constants.json
+/frontend/src/constants.json
+/backend/src/infra/constants.json
