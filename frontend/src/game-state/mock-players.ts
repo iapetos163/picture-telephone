@@ -1,4 +1,4 @@
-import { getPhase, getRoundType, submitPicture, submitText } from '.';
+import { getPhase, submitPicture, submitText } from '.';
 import { phrases, images } from './mock-data.json';
 import { joinLobby } from './mock-server';
 
