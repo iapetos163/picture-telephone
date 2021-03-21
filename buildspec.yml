@@ -1,0 +1,12 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - npm install -g yarn
+      - yarn
+  build:
+    commands:
+      - yarn build
+  post_build:
+    commands:
+      - rsync -rv dist/ $TARGET_PATH/
