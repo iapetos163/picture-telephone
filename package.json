@@ -37,8 +37,7 @@
     "react-dom": "^17.0.1"
   },
   "scripts": {
-    "build": "yarn update-consts && webpack",
-    "start": "webpack --watch",
-    "update-consts": "cp ../constants.json src/constants.json"
+    "build": "webpack",
+    "start": "webpack --watch"
   }
 }
