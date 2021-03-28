@@ -3,6 +3,11 @@ const PnpPlugin = require("pnp-webpack-plugin");
 
 module.exports = {
   entry: './src/main.tsx',
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    compress: true,
+    port: 8080,
+  },
   output: {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist')
