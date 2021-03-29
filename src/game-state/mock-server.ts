@@ -1,5 +1,4 @@
 import { sortBy, range } from 'lodash';
-import { setNumPlayers } from '.';
 
 export type ClientID = Date;
 export type SessionData = { playerID: number, numPlayers: number, roundPaths: number[][] }
@@ -32,7 +31,7 @@ function generateRoundPaths(numPlayers: number) {
 export function joinLobby(clientID: ClientID) {
   clients.push(clientID);
   // for each client
-  setNumPlayers(clients.length);
+  // setPlayers() /
 }
 
 export function startSession(): SessionData {

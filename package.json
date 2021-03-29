@@ -40,6 +40,6 @@
   },
   "scripts": {
     "build": "webpack",
-    "start": "webpack --watch"
+    "start": "webpack serve"
   }
 }

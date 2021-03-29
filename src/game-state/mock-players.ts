@@ -2,11 +2,11 @@ import { getPhase, submitPicture, submitText } from '.';
 import { phrases, images } from './mock-data.json';
 import { joinLobby } from './mock-server';
 
-export default class Player {
+export default class MockPlayer {
   private readonly id: number;
   private round = 0;
 
-  public static players: Player[] = [];
+  public static players: MockPlayer[] = [];
 
   constructor(id: number) {
     this.id = id;
@@ -35,14 +35,14 @@ export default class Player {
   }
   
   public static allStartGame() {
-    for (const player of Player.players) {
+    for (const player of MockPlayer.players) {
       player.startGame();
     }
   }
 
   public static allNextRound() {
     if (getPhase() === 'CREATE') {
-      for (const player of Player.players) {
+      for (const player of MockPlayer.players) {
         player.nextRound();
       }
     }
@@ -50,7 +50,7 @@ export default class Player {
 
   public static initialize(numPlayers: number) {
     for (let i=1; i <= numPlayers ; i++) {
-      Player.players.push(new Player(i));
+      MockPlayer.players.push(new MockPlayer(i));
     }
   }
 }

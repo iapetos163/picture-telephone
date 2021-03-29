@@ -1,14 +1,11 @@
 import React, { FC } from 'react';
 
-interface HeaderProps {
-  lobbyCount: number | undefined;
-}
+interface HeaderProps {}
 
-const Header: FC<HeaderProps> = ({ lobbyCount }) => {
+const Header: FC<HeaderProps> = () => {
   return (
     <header>
       <nav>
-        {lobbyCount !== undefined && <p>{lobbyCount} Player{lobbyCount === 1 ? '' : 's'} in Lobby</p>}
       </nav>
     </header>
   );

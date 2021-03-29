@@ -9,7 +9,6 @@ export interface ShowcaseItem {
 }
 
 interface ControllerProps {
-  setLobbyCount: React.Dispatch<SetStateAction<number | undefined>>;
   setPhase: React.Dispatch<SetStateAction<Phase>>;
   setRoundType: React.Dispatch<SetStateAction<RoundType>>;
   showcaseItems: List<ShowcaseItem>;
@@ -46,11 +45,6 @@ export class UIController {
     const items = List();
     this.props.setShowcaseItems(items);
     this.props.showcaseItems = items;
-  }
-
-  public setLobbyCount(count?: number) {
-    if (!this.props) throw UIController.uninitError;
-    this.props.setLobbyCount(count);
   }
 
   public displayPhase(phase: Phase) {

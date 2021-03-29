@@ -1,8 +1,11 @@
-import { joinLobby } from '../adapter';
+import { List } from 'immutable';
+import * as adapter from '../adapter';
 import { UIController } from '../UIController';
-import Player from "./mock-players";
+import MockPlayer from "./mock-players";
 import { joinLobby as mockJoinLobby, startSession } from "./mock-server";
 import Session from "./Session";
+
+export interface Player {}
 
 export type RoundType = 'TEXT' | 'PICTURE';
 export type Phase = 'LOBBY' | 'CREATE' | 'SHOW' | 'LOADING';
@@ -18,11 +21,22 @@ export function submitOwnText(text: string) {
   currentSession.submitOwnText(text);
 }
 
-export async function initialize(uic: UIController) {
+export async function createRoom(uic: UIController) {
   uiController = uic;
-  Player.initialize(5);
+  MockPlayer.initialize(5);
   mockJoinLobby(new Date());
-  await joinLobby();
+  const room = await adapter.createRoom();
+  currentSession = new Session(uic, room.allPlayers);
+}
+
+export async function joinRoom(uic: UIController, roomCode: string) {
+  uiController = uic;
+  const room = await adapter.joinRoom(roomCode);
+  currentSession = new Session(uic, room.allPlayers);
+}
+
+export function getPlayers() {
+  return List(currentSession.players);
 }
 
 // UI + session interface
@@ -38,13 +52,13 @@ export function showNext() {
 export function startGame() {
   uiController.displayPhase('LOADING');
   const {playerID, numPlayers, roundPaths} = startSession();
-  currentSession = new Session(uiController, playerID, numPlayers, roundPaths);
-  Player.allStartGame();
+  currentSession.startGame(playerID, numPlayers, roundPaths);
+  MockPlayer.allStartGame();
   uiController.displayPhase('CREATE');
 }
 
 export function mockNextRound() {
-  Player.allNextRound();
+  MockPlayer.allNextRound();
 }
 
 // Session intereface
@@ -55,12 +69,6 @@ export function submitPicture(player: number, picture: string) {
 
 export function submitText(player: number, text: string) {
   currentSession.submitText(player, text);
-}
-
-// Server interface
-
-export function setNumPlayers(numPlayers: number) {
-  uiController.setLobbyCount(numPlayers);
 }
 
 // Mock player interface

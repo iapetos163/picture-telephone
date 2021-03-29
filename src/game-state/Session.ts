@@ -1,27 +1,34 @@
 
-import { mockNextRound } from '.';
+import { mockNextRound, Player } from '.';
 import { UIController } from '../UIController';
 
 export type RoundType = 'TEXT' | 'PICTURE';
-export type Phase = 'CREATE' | 'SHOW';
+export type Phase = 'CREATE' | 'SHOW' | 'LOBBY';
 
+// web socket lives here
 export default class Session {
-  private playerID: number;
-  private numRounds: number;
+  private playerIndex = 0; // numerical index on game start
+  private numRounds = 0;
   private round = 0;
   private showingPath = 0;
-  private phase: Phase = 'CREATE';
+  private phase: Phase = 'LOBBY';
   private ui: UIController;
   private waiting = false;
   private readonly texts: string[][] = []; // [round/2][path]
   private readonly pictures: string[][] = []; // [round-1/2][path]
-  private readonly roundPaths: number[][] = []; // [round][player] = path
+  private roundPaths: number[][] = []; // [round][player] = path
+  public readonly players: Player[];
 
-  constructor(uiController: UIController, playerID: number, numRounds: number, roundPaths: number[][]) {
+  constructor(uiController: UIController, players: Player[]) {
     this.ui = uiController;
-    this.playerID = playerID;
-    this.numRounds = numRounds;
+    this.players = players;
+  }
+
+  public startGame(playerIndex: number, numRounds: number, roundPaths: number[][]) {
+    this.playerIndex = playerIndex;
+    this.numRounds = this.players.length;
     this.roundPaths = roundPaths;
+    this.phase = 'CREATE';
     for (let i = 0; i < numRounds; i++) {
       if (i % 2 === 0) {
         this.texts[i / 2] = new Array(Math.ceil(numRounds / 2));
@@ -42,7 +49,7 @@ export default class Session {
   public submitOwnText(text: string) {
     this.waiting = true;
     this.ui.showWaiting();
-    this.submitText(this.playerID, text);
+    this.submitText(this.playerIndex, text);
   }
 
   public submitText(player: number, text: string) {
@@ -59,7 +66,7 @@ export default class Session {
   public submitOwnPicture(picture: string) {
     this.waiting = true;
     this.ui.showWaiting();
-    this.submitPicture(this.playerID, picture);
+    this.submitPicture(this.playerIndex, picture);
   }
 
   public submitPicture(player: number, picture: string) {
@@ -86,13 +93,13 @@ export default class Session {
         this.ui.displayPhase('SHOW');
       } else if (this.round % 2 === 0) {
         if (this.round > 0) {
-          this.ui.showTextArea(this.pictures[(this.round - 2) / 2][this.roundPaths[this.round][this.playerID]]);
+          this.ui.showTextArea(this.pictures[(this.round - 2) / 2][this.roundPaths[this.round][this.playerIndex]]);
         } else {
           this.ui.showTextArea();
         }
       } else {
         if (this.round > 0) {
-          this.ui.showCanvas(this.texts[(this.round - 1) / 2][this.roundPaths[this.round][this.playerID]]);
+          this.ui.showCanvas(this.texts[(this.round - 1) / 2][this.roundPaths[this.round][this.playerIndex]]);
         } else {
           this.ui.showCanvas();
         }
