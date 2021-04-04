@@ -1,12 +1,25 @@
 
 import { mockNextRound, Player } from '.';
+import EventBus from './EventBus';
 import { UIController } from '../UIController';
+import { List } from 'immutable';
 
 export type RoundType = 'TEXT' | 'PICTURE';
 export type Phase = 'CREATE' | 'SHOW' | 'LOBBY';
+export type EventType = 'START' | 'PLAYERS' | 'SUBMIT';
+
+export interface StartData {
+  players: Player[];
+  roundPaths: number[][];
+}
+
+export interface PlayersData {
+  players: Player[];
+}
 
 // web socket lives here
 export default class Session {
+  private playerID: string;
   private playerIndex = 0; // numerical index on game start
   private numRounds = 0;
   private round = 0;
@@ -17,11 +30,23 @@ export default class Session {
   private readonly texts: string[][] = []; // [round/2][path]
   private readonly pictures: string[][] = []; // [round-1/2][path]
   private roundPaths: number[][] = []; // [round][player] = path
-  public readonly players: Player[];
+  private players: Player[];
+  public bus = new EventBus<EventType>(); // TODO: make private readonly once mock players are removed
 
-  constructor(uiController: UIController, players: Player[]) {
+  constructor(uiController: UIController, playerID: string, players: Player[]) {
     this.ui = uiController;
+    this.playerID = playerID;
     this.players = players;
+
+    this.bus.subscribe<StartData>('START', ({ players, roundPaths}) => {
+      const playerIndex = players.findIndex(p => p.id === this.playerID)
+      this.startGame(playerIndex, players.length, roundPaths);
+    });
+
+    this.bus.subscribe<PlayersData>('PLAYERS', ({ players }) => {
+      this.players = players;
+      this.ui.setPlayers(List(players));
+    });
   }
 
   public startGame(playerIndex: number, numRounds: number, roundPaths: number[][]) {

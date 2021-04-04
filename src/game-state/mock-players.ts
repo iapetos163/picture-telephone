@@ -1,17 +1,21 @@
 import { getPhase, submitPicture, submitText } from '.';
 import { phrases, images } from './mock-data.json';
-import { joinLobby } from './mock-server';
+import Session from './Session';
+import { UIController } from '../UIController';
+import { joinRoom } from '../adapter';
 
 export default class MockPlayer {
   private readonly id: number;
-  private round = 0;
+  private readonly session: Session;
 
   public static players: MockPlayer[] = [];
 
-  constructor(id: number) {
+  constructor(id: number, trueSession: Session) {
     this.id = id;
+    this.session = new Session(new UIController(true), Math.random().toString(), [], trueSession.bus);
+
     setTimeout(() => {
-      joinLobby(new Date());
+      joinRoom()
     }, Math.random() * 3000);
   }
 
@@ -48,9 +52,9 @@ export default class MockPlayer {
     }
   }
 
-  public static initialize(numPlayers: number) {
+  public static initialize(numPlayers: number, trueSession: Session) {
     for (let i=1; i <= numPlayers ; i++) {
-      MockPlayer.players.push(new MockPlayer(i));
+      MockPlayer.players.push(new MockPlayer(i, trueSession));
     }
   }
 }

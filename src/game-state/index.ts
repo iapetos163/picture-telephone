@@ -5,7 +5,9 @@ import MockPlayer from "./mock-players";
 import { joinLobby as mockJoinLobby, startSession } from "./mock-server";
 import Session from "./Session";
 
-export interface Player {}
+export interface Player {
+  id: string;
+}
 
 export type RoundType = 'TEXT' | 'PICTURE';
 export type Phase = 'LOBBY' | 'CREATE' | 'SHOW' | 'LOADING';
@@ -26,17 +28,13 @@ export async function createRoom(uic: UIController) {
   MockPlayer.initialize(5);
   mockJoinLobby(new Date());
   const room = await adapter.createRoom();
-  currentSession = new Session(uic, room.allPlayers);
+  currentSession = new Session(uic, room.ownPlayer.id, room.allPlayers);
 }
 
 export async function joinRoom(uic: UIController, roomCode: string) {
   uiController = uic;
   const room = await adapter.joinRoom(roomCode);
-  currentSession = new Session(uic, room.allPlayers);
-}
-
-export function getPlayers() {
-  return List(currentSession.players);
+  currentSession = new Session(uic, room.ownPlayer.id, room.allPlayers);
 }
 
 // UI + session interface
