@@ -1,7 +1,6 @@
 import { List } from 'immutable';
 import { SetStateAction } from "react";
-import { Phase, Player } from "./game-state";
-import { RoundType } from "./game-state/Session";
+import { Phase, Player, RoundType } from "./game-state";
 
 export interface ShowcaseItem {
   elementType: 'image' | 'text';

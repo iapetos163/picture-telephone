@@ -4,6 +4,10 @@ import { EventType, PlayersData } from './events';
 import Session from './Session';
 import { UIController } from '../UIController';
 import * as adapter from '../adapter';
+import LobbySession from './Session/LobbySession';
+
+const ERR_LOBBY_SUBMIT = new Error('Lobby session received SUBMIT event');
+const ERR_LOBBY_PLAY = new Error('Tried to play round in lobby session');
 
 export default class MockPlayer {
   private readonly session: Session;
@@ -11,7 +15,7 @@ export default class MockPlayer {
   public static players: MockPlayer[] = [];
 
   constructor(room: string, bus: EventBus<EventType>) {
-    this.session = new Session(new UIController(true), room, Math.random().toString(), [], bus);
+    this.session = new LobbySession(new UIController(true), room, Math.random().toString(), [], bus);
 
     setTimeout(() => {
       adapter.joinRoom(room).then(({ allPlayers }) => {
@@ -20,6 +24,9 @@ export default class MockPlayer {
           this.playRound()
         });
         bus.subscribe('SUBMIT', () => {
+          if (!Session.isActive(this.session)) {
+            throw ERR_LOBBY_SUBMIT;
+          }
           if (!this.session.waiting) {
             this.playRound();
           }
@@ -31,6 +38,9 @@ export default class MockPlayer {
   private playRound() {
     if (this.session.currentPhase === 'CREATE') {
       setTimeout(() => {
+        if (!Session.isActive(this.session)) {
+          throw ERR_LOBBY_PLAY;
+        }
         if (this.session.roundType === 'TEXT') {
           this.session.submitText(phrases[Math.floor(Math.random() * phrases.length)]);
         } else {

@@ -1,6 +1,6 @@
 import React, { FC, useState, createRef, ChangeEvent } from 'react';
 import CanvasContainer from './CanvasContainer';
-import { submitOwnPicture, submitOwnText, RoundType } from '../game-state';
+import { submitPicture, submitText, RoundType } from '../game-state';
 
 interface CreateProps {
   onError(message: string | Error | ErrorEvent): void;
@@ -20,12 +20,12 @@ const Create: FC<CreateProps> = ({ onError, prevDescription, prevPictureSource, 
   const onDone = () => {
     if(roundType === 'PICTURE') {
       if (canvasRef.current) {
-        submitOwnPicture(canvasRef.current.toDataURL());
+        submitPicture(canvasRef.current.toDataURL());
       } else {
         onError(CANVAS_REF_ERROR);
       }
     } else {
-      submitOwnText(description);
+      submitText(description);
       setDescription('');
     }
   };

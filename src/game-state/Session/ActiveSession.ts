@@ -1,44 +1,29 @@
-import { List } from 'immutable';
-import { Player } from '.';
-import EventBus from './EventBus';
-import { EventType, StartData, PlayersData, SubmitData } from './events';
-import { UIController } from '../UIController';
-
-export type RoundType = 'TEXT' | 'PICTURE';
-export type Phase = 'CREATE' | 'SHOW' | 'LOBBY';
+import Session from '.';
+import { Player, RoundType, Phase } from '..';
+import EventBus from '../EventBus';
+import { EventType, SubmitData } from '../events';
+import { UIController } from '../../UIController';
 
 // web socket lives here
-export default class Session {
-  private readonly bus: EventBus<EventType>;
-  private numRounds = 0;
-  private phase: Phase = 'LOBBY';
-  private playerID: string;
-  private playerIndex = 0;
-  private players: Player[];
-  private round = 0;
-  private showingPath = 0;
-  private ui: UIController;
+export default class ActiveSession extends Session {
+  private readonly numRounds: number;
+  private readonly playerIndex: number;
   private readonly texts: string[][] = []; // [round/2][path]
   private readonly pictures: string[][] = []; // [round-1/2][path]
-  private roundPaths: number[][] = []; // [round][player] = path
-  public readonly roomCode: string;
+  private readonly roundPaths: number[][]; // [round][player] = path
+  private round = 0;
+  private showingPath = 0;
+  protected phase: Phase;
   public waiting = false;
 
-  constructor(uiController: UIController, roomCode: string, playerID: string, players: Player[], bus: EventBus<EventType>) {
-    this.ui = uiController;
-    this.roomCode = roomCode;
-    this.playerID = playerID;
-    this.players = players;
-    this.bus = bus;
+  constructor(uiController: UIController, roomCode: string, playerID: string, players: Player[], bus: EventBus<EventType>, roundPaths: number[][]) {
+    super(uiController, roomCode, playerID, players, bus);
 
-    this.bus.subscribe<StartData>('START', ({ players, roundPaths}) => {
-      this.onStartGame(players, roundPaths);
-    });
-
-    this.bus.subscribe<PlayersData>('PLAYERS', ({ players }) => {
-      this.players = players;
-      this.ui.setPlayers(List(players));
-    });
+    const playerIndex = this.players.findIndex(p => p.id === this.playerID)
+    this.playerIndex = playerIndex;
+    this.numRounds = this.players.length;
+    this.roundPaths = roundPaths;
+    this.phase = 'CREATE';
 
     this.bus.subscribe<SubmitData>('SUBMIT', ({ playerIndex, type, data }) => {
       if (type === 'TEXT') {
@@ -47,14 +32,7 @@ export default class Session {
         this.onSubmitPicture(playerIndex, data);
       }
     })
-  }
-  
-  private onStartGame(players: Player[], roundPaths: number[][]) {
-    const playerIndex = players.findIndex(p => p.id === this.playerID)
-    this.playerIndex = playerIndex;
-    this.numRounds = this.players.length;
-    this.roundPaths = roundPaths;
-    this.phase = 'CREATE';
+
     for (let i = 0; i < this.numRounds; i++) {
       if (i % 2 === 0) {
         this.texts[i / 2] = new Array(Math.ceil(this.numRounds / 2));
@@ -67,10 +45,6 @@ export default class Session {
 
   public get roundType(): RoundType {
     return this.round % 2 === 0 ? 'TEXT' : 'PICTURE';
-  }
-
-  public get currentPhase() {
-    return this.phase;
   }
 
   public submitText(text: string) {

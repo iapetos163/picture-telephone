@@ -1,13 +1,10 @@
-import { List } from 'immutable';
 import React, { useState } from 'react';
 import FrontPage from './components/FrontPage';
 import Header from './components/Header';
 import * as gameState from './game-state';
 import ErrorComponent from './components/Error';
-import { Phase } from './game-state';
 import Game from './components/Game';
 import { UIController, ShowcaseItem } from './UIController';
-import { RoundType } from './game-state/Session';
 
 const uiController = new UIController();
 

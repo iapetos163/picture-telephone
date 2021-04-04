@@ -6,6 +6,7 @@ import Loading from './Loading';
 import Lobby from './Lobby';
 import ShowAndTell from './ShowAndTell';
 import { ShowcaseItem, UIController } from '../UIController';
+import { startGame } from '../game-state';
 
 interface GameProps {
   onError(message: string | Error | ErrorEvent): void;
@@ -23,10 +24,13 @@ const Game: FC<GameProps> = ({ uiController, onError }) => {
   const [waiting, setWaiting] = useState(false);
   uiController.refresh({ setPrevDescription, setPrevPictureSource, setRoundType, setShowcaseItems, showcaseItems, setPhase, setPlayers, setWaiting });
 
+  const onStartGame = () => {
+    startGame().catch(onError);
+  }
 
   return (
     <div id="game-container">
-      { phase === 'LOBBY' && <Lobby players={players}/> }
+      { phase === 'LOBBY' && <Lobby {...{ players, onStartGame }}/> }
       { phase === 'LOADING' && <Loading /> }
       { phase === 'CREATE' && <Create {...{ prevDescription, prevPictureSource, onError, roundType, waiting, }} /> }
       { phase === 'SHOW' && <ShowAndTell showcaseItems={showcaseItems} /> }
