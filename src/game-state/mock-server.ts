@@ -1,7 +1,7 @@
 import { sortBy, range } from 'lodash';
 
-export type ClientID = Date;
-export type SessionData = { playerID: number, numPlayers: number, roundPaths: number[][] }
+type ClientID = Date;
+type SessionData = { playerID: number, numPlayers: number, roundPaths: number[][] }
 
 const clients: ClientID[] = [];
 
@@ -28,13 +28,13 @@ function generateRoundPaths(numPlayers: number) {
   return range(numPlayers).map(i => permRepeated.slice(i, i + numPlayers));
 }
 
-export function joinLobby(clientID: ClientID) {
+function joinLobby(clientID: ClientID) {
   clients.push(clientID);
   // for each client
   // setPlayers() /
 }
 
-export function startSession(): SessionData {
+function startSession(): SessionData {
   return {
     playerID: 0,
     numPlayers: clients.length,

@@ -1,6 +1,6 @@
 import { List } from 'immutable';
 import React, { FC, useState } from 'react';
-import { Phase, RoundType, getPlayers } from '../game-state';
+import { Phase, RoundType, Player } from '../game-state';
 import Create from './Create';
 import Loading from './Loading';
 import Lobby from './Lobby';
@@ -15,17 +15,18 @@ interface GameProps {
 
 const Game: FC<GameProps> = ({ uiController, onError }) => {
   const [phase, setPhase] = useState<Phase>('LOADING');
+  const [players, setPlayers] = useState<List<Player>>(List());
   const [roundType, setRoundType] = useState<RoundType>('TEXT');
   const [prevDescription, setPrevDescription] = useState('');
   const [prevPictureSource, setPrevPictureSource] = useState('');
   const [showcaseItems, setShowcaseItems] = useState<List<ShowcaseItem>>(List());
   const [waiting, setWaiting] = useState(false);
-  uiController.refresh({ setPrevDescription, setPrevPictureSource, setRoundType, setShowcaseItems, showcaseItems, setPhase, setWaiting });
+  uiController.refresh({ setPrevDescription, setPrevPictureSource, setRoundType, setShowcaseItems, showcaseItems, setPhase, setPlayers, setWaiting });
 
 
   return (
     <div id="game-container">
-      { phase === 'LOBBY' && <Lobby players={getPlayers()}/> }
+      { phase === 'LOBBY' && <Lobby players={players}/> }
       { phase === 'LOADING' && <Loading /> }
       { phase === 'CREATE' && <Create {...{ prevDescription, prevPictureSource, onError, roundType, waiting, }} /> }
       { phase === 'SHOW' && <ShowAndTell showcaseItems={showcaseItems} /> }

@@ -24,3 +24,7 @@ export async function joinRoom(room: string): Promise<Room> {
   const res = await handle.post('/join-room', { room });
   return res.data;
 }
+
+export async function startGame(room: string): Promise<void> {
+  await handle.post('/start', { room });
+}

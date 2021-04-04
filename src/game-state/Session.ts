@@ -1,5 +1,7 @@
-
-import { mockNextRound, Player } from '.';
+import { List } from 'immutable';
+import { Player } from '.';
+import EventBus from './EventBus';
+import { EventType, StartData, PlayersData, SubmitData } from './events';
 import { UIController } from '../UIController';
 
 export type RoundType = 'TEXT' | 'PICTURE';
@@ -7,35 +9,60 @@ export type Phase = 'CREATE' | 'SHOW' | 'LOBBY';
 
 // web socket lives here
 export default class Session {
-  private playerIndex = 0; // numerical index on game start
+  private readonly bus: EventBus<EventType>;
   private numRounds = 0;
+  private phase: Phase = 'LOBBY';
+  private playerID: string;
+  private playerIndex = 0;
+  private players: Player[];
   private round = 0;
   private showingPath = 0;
-  private phase: Phase = 'LOBBY';
   private ui: UIController;
-  private waiting = false;
   private readonly texts: string[][] = []; // [round/2][path]
   private readonly pictures: string[][] = []; // [round-1/2][path]
   private roundPaths: number[][] = []; // [round][player] = path
-  public readonly players: Player[];
+  public readonly roomCode: string;
+  public waiting = false;
 
-  constructor(uiController: UIController, players: Player[]) {
+  constructor(uiController: UIController, roomCode: string, playerID: string, players: Player[], bus: EventBus<EventType>) {
     this.ui = uiController;
+    this.roomCode = roomCode;
+    this.playerID = playerID;
     this.players = players;
-  }
+    this.bus = bus;
 
-  public startGame(playerIndex: number, numRounds: number, roundPaths: number[][]) {
+    this.bus.subscribe<StartData>('START', ({ players, roundPaths}) => {
+      this.onStartGame(players, roundPaths);
+    });
+
+    this.bus.subscribe<PlayersData>('PLAYERS', ({ players }) => {
+      this.players = players;
+      this.ui.setPlayers(List(players));
+    });
+
+    this.bus.subscribe<SubmitData>('SUBMIT', ({ playerIndex, type, data }) => {
+      if (type === 'TEXT') {
+        this.onSubmitText(playerIndex, data);
+      } else {
+        this.onSubmitPicture(playerIndex, data);
+      }
+    })
+  }
+  
+  private onStartGame(players: Player[], roundPaths: number[][]) {
+    const playerIndex = players.findIndex(p => p.id === this.playerID)
     this.playerIndex = playerIndex;
     this.numRounds = this.players.length;
     this.roundPaths = roundPaths;
     this.phase = 'CREATE';
-    for (let i = 0; i < numRounds; i++) {
+    for (let i = 0; i < this.numRounds; i++) {
       if (i % 2 === 0) {
-        this.texts[i / 2] = new Array(Math.ceil(numRounds / 2));
+        this.texts[i / 2] = new Array(Math.ceil(this.numRounds / 2));
       } else {
-        this.pictures[(i - 1) / 2] = new Array(Math.floor(numRounds / 2));
+        this.pictures[(i - 1) / 2] = new Array(Math.floor(this.numRounds / 2));
       }
     }
+    this.ui.displayPhase('CREATE');
   }
 
   public get roundType(): RoundType {
@@ -46,13 +73,27 @@ export default class Session {
     return this.phase;
   }
 
-  public submitOwnText(text: string) {
+  public submitText(text: string) {
     this.waiting = true;
     this.ui.showWaiting();
-    this.submitText(this.playerIndex, text);
+    this.bus.publish<SubmitData>('SUBMIT', {
+      playerIndex: this.playerIndex,
+      type: 'TEXT',
+      data: text,
+    });
   }
 
-  public submitText(player: number, text: string) {
+  public submitPicture(picture: string) {
+    this.waiting = true;
+    this.ui.showWaiting();
+    this.bus.publish<SubmitData>('SUBMIT', {
+      playerIndex: this.playerIndex,
+      type: 'PICTURE',
+      data: picture,
+    });
+  }
+
+  private onSubmitText(player: number, text: string) {
     this.texts[this.round / 2][this.roundPaths[this.round][player]] = text;
     for (let i = 0; i < this.numRounds ; i++) {
       if(this.texts[this.round / 2][i] == undefined) {
@@ -60,16 +101,9 @@ export default class Session {
       }
     }
     this.nextRound();
-    mockNextRound();
   }
 
-  public submitOwnPicture(picture: string) {
-    this.waiting = true;
-    this.ui.showWaiting();
-    this.submitPicture(this.playerIndex, picture);
-  }
-
-  public submitPicture(player: number, picture: string) {
+  private onSubmitPicture(player: number, picture: string) {
     this.pictures[(this.round - 1) / 2][this.roundPaths[this.round][player]] = picture;
     for (let i = 0; i < this.pictures[0].length ; i++) {
       if(this.pictures[(this.round - 1) / 2][i] == undefined) {
@@ -77,11 +111,9 @@ export default class Session {
       }
     }
     this.nextRound();
-    mockNextRound();
   }
 
   public nextRound() {
-    console.log('next round')
     this.waiting = false;
     this.ui.showDoneButton();
     if (this.phase === 'CREATE') {
@@ -105,10 +137,8 @@ export default class Session {
         }
       }
     } else {
-      console.log(this.round , this.numRounds)
       if (++this.round === this.numRounds) {
         this.round = 0;
-        console.log('clearing showcase...')
         this.ui.clearShowcase();
         if (++this.showingPath===this.numRounds) {
           this.ui.showTextArea();
@@ -117,7 +147,6 @@ export default class Session {
           return;
         }
       }
-      console.log('showcasing')
       if (this.round % 2 === 0) {
         this.ui.showcaseText(this.texts[this.round / 2][this.showingPath]);
       } else {
