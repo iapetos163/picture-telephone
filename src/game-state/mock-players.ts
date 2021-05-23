@@ -14,7 +14,8 @@ export default class MockPlayer {
 
   public static players: MockPlayer[] = [];
 
-  constructor(room: string, bus: EventBus<EventType>) {
+  constructor(room: string) {
+    const bus = new EventBus<EventType>();
     this.session = new LobbySession(new UIController(true), room, Math.random().toString(), [], bus);
 
     setTimeout(() => {
@@ -50,9 +51,9 @@ export default class MockPlayer {
     }
   }
 
-  public static initialize(numPlayers: number, room: string, bus: EventBus<EventType>) {
+  public static initialize(numPlayers: number, room: string) {
     for (let i=1; i <= numPlayers ; i++) {
-      MockPlayer.players.push(new MockPlayer(room, bus));
+      MockPlayer.players.push(new MockPlayer(room));
     }
   }
 }

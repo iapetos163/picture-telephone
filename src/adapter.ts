@@ -1,3 +1,6 @@
+import { DOMAIN_NAME } from './constants.json';
+import EventBus from './game-state/EventBus';
+
 export type SymmetricEvent = 'SUBMIT';
 export const SYMMETRIC_EVENTS: SymmetricEvent[] = ['SUBMIT'];
 export type ClientEvent = 'JOIN' | 'CREATE' | 'START' | SymmetricEvent;
@@ -40,10 +43,14 @@ export interface JoinData {
   room: string;
 }
 
-import { DOMAIN_NAME } from './constants.json';
-import EventBus from './game-state/EventBus';
+function messageGuard<ET>(events: ET[]) {
+  return (m: any): m is Message<ET> =>
+    m && (typeof m.event === 'string') && events.indexOf(m.event) >= 0 && m.data !== undefined;
+}
 
-export function connect(bus: EventBus<ClientEvent>): Promise<void> {
+export const isValidServerMessage = messageGuard<ServerEvent>(SERVER_EVENTS);
+
+export function connect(bus: EventBus<EventType>): Promise<void> {
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(`wss://${DOMAIN_NAME}`);
     ws.onclose = () => {
@@ -55,14 +62,13 @@ export function connect(bus: EventBus<ClientEvent>): Promise<void> {
       reject(err);
     };
     
-    ws.onmessage = message => {
-      console.log('RECEIVED', message.data, typeof message.data)
-      // TODO: validate
-      const event = JSON.parse(message.data);
-      if (event.event === undefined || event.data === undefined) {
+    ws.onmessage = m => {
+      const message = JSON.parse(m.data);
+      if (!isValidServerMessage(message)) {
         console.error('Invalid message from server', message);
+        return;
       }
-      bus.publish(event.event, event.data);
+      bus.publish(message.event, message.data);
     };
 
     ws.onopen = () => {

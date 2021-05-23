@@ -36,10 +36,10 @@ export function createRoom(uic: UIController): Promise<void> {
   return new Promise((resolve, reject) => {
     adapter.connect(bus).then(() => {
       const subscription = bus.subscribe<RoomData>('ROOM', (room) => {
-        console.log('GOT ROOM', room)
         currentSession = new LobbySession(uic, room.id, room.ownPlayer.id, room.allPlayers, bus);
         resolve();
         bus.unsubscribe('ROOM', subscription);
+        MockPlayer.initialize(5, room.id);
       });
 
       bus.publish<CreateData>('CREATE', null);
