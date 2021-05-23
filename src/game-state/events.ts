@@ -1,18 +1,4 @@
-import { Player, RoundType } from '.';
+export { EventType } from '../adapter';
+export { SubmitData, StartedData, ClientEvent, ServerEvent, RoomData, JoinData, StartData } from '../adapter';
 
-export type EventType = 'START' | 'PLAYERS' | 'SUBMIT';
-
-export interface StartData {
-  players: Player[];
-  roundPaths: number[][];
-}
-
-export interface PlayersData {
-  players: Player[];
-}
-
-export interface SubmitData {
-  playerIndex: number;
-  type: RoundType;
-  data: string;
-}
+export type CreateData = null;

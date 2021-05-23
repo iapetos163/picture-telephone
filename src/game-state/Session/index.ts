@@ -1,3 +1,4 @@
+import { List} from 'immutable';
 import ActiveSession from './ActiveSession';
 import { Player, Phase } from '..';
 import EventBus from '../EventBus';
@@ -6,7 +7,7 @@ import { UIController } from '../../UIController';
 
 
 // web socket lives here
-abstract class Session {
+export default abstract class Session {
   protected readonly bus: EventBus<EventType>;
   protected abstract phase: Phase;
   protected playerID: string;
@@ -20,6 +21,7 @@ abstract class Session {
     this.playerID = playerID;
     this.players = players;
     this.bus = bus;
+    this.ui.setPlayers(List(players));
   }
   public get currentPhase() {
     return this.phase;
@@ -29,7 +31,3 @@ abstract class Session {
     return s.phase !== 'LOBBY';
   }
 }
-
-namespace Session {}
-
-export default Session;

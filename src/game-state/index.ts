@@ -5,12 +5,9 @@ import Session from './Session';
 import ActiveSession from './Session/ActiveSession';
 import LobbySession from './Session/LobbySession';
 import EventBus from './EventBus';
-import { EventType } from './events';
+import { ClientEvent, ServerEvent, RoomData, CreateData, JoinData } from './events';
+export { Player, RoundType } from '../adapter';
 
-export interface Player {
-  id: string;
-}
-export type RoundType = 'TEXT' | 'PICTURE';
 export type Phase = 'LOBBY' | 'CREATE' | 'SHOW' | 'LOADING';
 
 const ERR_SUBMIT_LOBBY = new Error('Cannot submit to lobby session');
@@ -33,24 +30,44 @@ export function submitText(text: string) {
   currentSession.submitText(text);
 }
 
-export async function createRoom(uic: UIController) {
+export function createRoom(uic: UIController): Promise<void> {
   uiController = uic;
-  const bus = new EventBus<EventType>();
-  const room = await adapter.createRoom();
-  MockPlayer.initialize(5, room.id, bus);
-  currentSession = new LobbySession(uic, room.id, room.ownPlayer.id, room.allPlayers, bus);
+  const bus = new EventBus<ClientEvent | ServerEvent>();
+  return new Promise((resolve, reject) => {
+    adapter.connect(bus).then(() => {
+      const subscription = bus.subscribe<RoomData>('ROOM', (room) => {
+        console.log('GOT ROOM', room)
+        currentSession = new LobbySession(uic, room.id, room.ownPlayer.id, room.allPlayers, bus);
+        resolve();
+        bus.unsubscribe('ROOM', subscription);
+      });
+
+      bus.publish<CreateData>('CREATE', null);
+    }).catch(reject);
+  });
 }
 
-export async function joinRoom(uic: UIController, roomCode: string) {
+export function joinRoom(uic: UIController, roomCode: string): Promise<void> {
   uiController = uic;
-  const room = await adapter.joinRoom(roomCode);
-  const bus = new EventBus<EventType>();
-  currentSession = new LobbySession(uic, roomCode, room.ownPlayer.id, room.allPlayers, bus);
+  const bus = new EventBus<ClientEvent | ServerEvent>();
+  return new Promise((resolve, reject) => {
+    adapter.connect(bus).then(() => {
+      const subscription = bus.subscribe<RoomData>('ROOM', (room) => {
+        currentSession = new LobbySession(uic, room.id, room.ownPlayer.id, room.allPlayers, bus);
+        resolve();
+        bus.unsubscribe('ROOM', subscription);
+      });
+
+      bus.publish<JoinData>('JOIN', { room: roomCode});
+    }).catch(reject);
+  });
 }
 
-export async function startGame() {
-  uiController.displayPhase('LOADING');
-  await adapter.startGame(currentSession.roomCode)
+export function startGame() {
+  if (Session.isActive(currentSession)) {
+    throw new Error('Cannot start game for active session');
+  }
+  currentSession.requestStartGame();
 }
 
 export function activateSession(roundPaths: number[][]) {

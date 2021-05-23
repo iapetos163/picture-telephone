@@ -1,6 +1,6 @@
 import { phrases, images } from './mock-data.json';
 import EventBus from './EventBus';
-import { EventType, PlayersData } from './events';
+import { EventType, JoinData } from './events';
 import Session from './Session';
 import { UIController } from '../UIController';
 import * as adapter from '../adapter';
@@ -18,8 +18,8 @@ export default class MockPlayer {
     this.session = new LobbySession(new UIController(true), room, Math.random().toString(), [], bus);
 
     setTimeout(() => {
-      adapter.joinRoom(room).then(({ allPlayers }) => {
-        bus.publish<PlayersData>('PLAYERS', { players: allPlayers });
+      adapter.connect(bus).then(() => {
+        bus.publish<JoinData>('JOIN', { room });
         bus.subscribe('START', () => {
           this.playRound()
         });

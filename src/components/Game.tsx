@@ -25,7 +25,7 @@ const Game: FC<GameProps> = ({ uiController, onError }) => {
   uiController.refresh({ setPrevDescription, setPrevPictureSource, setRoundType, setShowcaseItems, showcaseItems, setPhase, setPlayers, setWaiting });
 
   const onStartGame = () => {
-    startGame().catch(onError);
+    startGame();
   }
 
   return (

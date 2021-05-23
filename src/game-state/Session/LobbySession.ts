@@ -2,7 +2,7 @@ import { List } from 'immutable';
 import Session from '.';
 import { Player, Phase, activateSession } from '..';
 import EventBus from '../EventBus';
-import { EventType, StartData, PlayersData } from '../events';
+import { EventType, StartedData, RoomData, StartData } from '../events';
 import { UIController } from '../../UIController';
 import ActiveSession from './ActiveSession';
 
@@ -14,18 +14,23 @@ export default class LobbySession extends Session {
     super(uiController, roomCode, playerID, players, bus);
     this.phase = 'LOBBY';
 
-    this.bus.subscribe<StartData>('START', ({ players, roundPaths }) => {
+    this.bus.subscribe<StartedData>('STARTED', ({ players, roundPaths }) => {
       this.updatePlayers(players);
       activateSession(roundPaths);
     });
 
-    this.bus.subscribe<PlayersData>('PLAYERS', ({ players }) => {
-      this.updatePlayers(players);
+    this.bus.subscribe<RoomData>('ROOM', ({ allPlayers }) => {
+      this.updatePlayers(allPlayers);
     });
   }
 
   public activate(roundPaths: number[][]): ActiveSession {
     return new ActiveSession(this.ui, this.roomCode, this.playerID, this.players, this.bus, roundPaths);
+  }
+
+  public requestStartGame() {
+    this.ui.displayPhase('LOADING');
+    this.bus.publish<StartData>('START', null);
   }
 
   private updatePlayers(players: Player[]) {
