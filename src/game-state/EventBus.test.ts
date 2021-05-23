@@ -30,4 +30,18 @@ describe('EventBus', () => {
     expect(cbA2).toHaveBeenLastCalledWith('AAA');
     expect(cbB).toHaveBeenCalledTimes(1);
   });
+
+  it('Can unsubscribe', () => {
+    const bus = new EventBus<TestEvent>();
+  
+    const cb = jest.fn();
+    const sub = bus.subscribe('A', cb);
+
+    bus.publish<AData>('A', 'aaa');
+    expect(cb).toHaveBeenCalled();
+
+    bus.unsubscribe('A', sub);
+    bus.publish<AData>('A', 'AAA');
+    expect(cb).toHaveBeenCalledTimes(1);
+  });
 })

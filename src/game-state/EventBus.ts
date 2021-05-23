@@ -1,11 +1,10 @@
 type Listeners = Map<Symbol, ((data: any) => void)>
 
 export default class EventBus<EventType> {
-  private getListeners: (event: EventType) => Listeners = e => new Map(); 
+  private getListeners: (event: EventType) => Listeners = e => new Map();
 
   public publish<DataType>(event: EventType, data: DataType) {
     const listeners = this.getListeners(event);
-    console.log('PUBLISHING', event, listeners);
     for (const listener of listeners.values()) {
       listener(data);
     }
@@ -25,7 +24,13 @@ export default class EventBus<EventType> {
   }
 
   public unsubscribe(event: EventType, key: Symbol) {
-    const listeners = this.getListeners(event);
-    return listeners.delete(key);
+    const prevGetListeners = this.getListeners;
+    this.getListeners = (e: EventType) => {
+      const listeners = prevGetListeners(e);
+      if (e === event) {
+        listeners.delete(key);
+      }
+      return listeners;
+    };
   }
 }
