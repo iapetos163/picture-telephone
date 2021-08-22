@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { DOMAIN_NAME } from './constants.json';
 import EventBus from './game-state/EventBus';
 
@@ -65,6 +66,20 @@ export function connect(bus: EventBus<EventType>): Promise<void> {
       console.error(err);
       reject(err);
     };
+
+    ws.onopen = () => {
+      resolve();
+    };
+
+    const clientSubscriptions = _(CLIENT_EVENTS)
+    .map((event): [ClientEvent, Symbol] =>
+      [event, bus.subscribe(event, data => {
+        const message: Message<ClientEvent> = { event, data };
+        console.log('SENDING MESSAGE')
+        ws.send(JSON.stringify(message));
+      })])
+    .fromPairs()
+    .value();
     
     ws.onmessage = m => {
       const message = JSON.parse(m.data);
@@ -72,18 +87,9 @@ export function connect(bus: EventBus<EventType>): Promise<void> {
         console.error('Invalid message from server', message);
         return;
       }
-      bus.publish(message.event, message.data);
+      const clientSub = clientSubscriptions[message.event];
+      const exclude = clientSub && new Set([clientSub]);
+      bus.publish(message.event, message.data, exclude);
     };
-
-    ws.onopen = () => {
-      resolve();
-    };
-
-    for (const event of CLIENT_EVENTS) {
-      bus.subscribe(event, data => {
-        const message: Message<ClientEvent> = { event, data };
-        ws.send(JSON.stringify(message));
-      });
-    }
   });
 }

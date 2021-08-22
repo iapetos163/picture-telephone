@@ -3,10 +3,10 @@ type Listeners = Map<Symbol, ((data: any) => void)>
 export default class EventBus<EventType> {
   private getListeners: (event: EventType) => Listeners = e => new Map();
 
-  public publish<DataType>(event: EventType, data: DataType) {
+  public publish<DataType>(event: EventType, data: DataType, exclude?: Set<Symbol>) {
     const listeners = this.getListeners(event);
-    for (const listener of listeners.values()) {
-      listener(data);
+    for (const [key, listener] of listeners) {
+      if (!exclude || !exclude.has(key)) listener(data);
     }
   }
 
