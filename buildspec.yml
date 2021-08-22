@@ -3,6 +3,7 @@ phases:
   install:
     commands:
       - npm install -g yarn@berry
+      - yarn plugin import typescript
       - yarn
   build:
     commands:
