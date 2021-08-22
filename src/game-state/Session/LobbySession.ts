@@ -2,7 +2,7 @@ import { List } from 'immutable';
 import Session from '.';
 import { Player, Phase, activateSession } from '..';
 import EventBus from '../EventBus';
-import { EventType, StartedData, RoomData, StartData } from '../events';
+import { ErrorData, EventType, StartedData, RoomData, StartData } from '../events';
 import { UIController } from '../../UIController';
 import ActiveSession from './ActiveSession';
 
@@ -13,6 +13,10 @@ export default class LobbySession extends Session {
   constructor(uiController: UIController, roomCode: string, playerID: string, players: Player[], bus: EventBus<EventType>) {
     super(uiController, roomCode, playerID, players, bus);
     this.phase = 'LOBBY';
+
+    this.bus.subscribe<ErrorData>('ERROR', ({ message }) => {
+      console.error(message);
+    });
 
     this.bus.subscribe<StartedData>('STARTED', ({ players, roundPaths }) => {
       this.updatePlayers(players);

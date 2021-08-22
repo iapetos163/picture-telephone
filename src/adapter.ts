@@ -5,8 +5,8 @@ export type SymmetricEvent = 'SUBMIT';
 export const SYMMETRIC_EVENTS: SymmetricEvent[] = ['SUBMIT'];
 export type ClientEvent = 'JOIN' | 'CREATE' | 'START' | SymmetricEvent;
 export const CLIENT_EVENTS: ClientEvent[] = (['JOIN', 'CREATE', 'START'] as ClientEvent[]).concat(SYMMETRIC_EVENTS);
-export type ServerEvent = 'ROOM' | 'STARTED' | SymmetricEvent;
-export const SERVER_EVENTS: ServerEvent[] = (['ROOM', 'STARTED'] as ServerEvent[]).concat(SYMMETRIC_EVENTS);
+export type ServerEvent = 'ROOM' | 'STARTED' | 'ERROR' | SymmetricEvent;
+export const SERVER_EVENTS: ServerEvent[] = (['ROOM', 'STARTED', 'ERROR'] as ServerEvent[]).concat(SYMMETRIC_EVENTS);
 export type EventType = ClientEvent | ServerEvent;
 
 export interface Message<ET> {
@@ -41,6 +41,10 @@ export interface SubmitData {
 
 export interface JoinData {
   room: string;
+}
+
+export interface ErrorData {
+  message: string;
 }
 
 function messageGuard<ET>(events: ET[]) {
