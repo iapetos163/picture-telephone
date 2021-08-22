@@ -26,6 +26,8 @@ export default class LobbySession extends Session {
     this.bus.subscribe<RoomData>('ROOM', ({ allPlayers }) => {
       this.updatePlayers(allPlayers);
     });
+
+    uiController.setRoom(roomCode);
   }
 
   public activate(roundPaths: number[][]): ActiveSession {

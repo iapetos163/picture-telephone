@@ -9,6 +9,7 @@ export interface ShowcaseItem {
 
 interface ControllerProps {
   setPhase: React.Dispatch<SetStateAction<Phase>>;
+  setRoom: React.Dispatch<SetStateAction<string>>;
   setRoundType: React.Dispatch<SetStateAction<RoundType>>;
   showcaseItems: List<ShowcaseItem>;
   setShowcaseItems: React.Dispatch<SetStateAction<List<ShowcaseItem>>>;
@@ -65,6 +66,12 @@ export class UIController {
     if (this.mock) return;
     if (!this.props) throw UIController.uninitError;
     this.props.setPlayers(players);
+  }
+
+  public setRoom(room: string) {
+    if (this.mock) return;
+    if (!this.props) throw UIController.uninitError;
+    this.props.setRoom(room);
   }
 
   public showWaiting() {

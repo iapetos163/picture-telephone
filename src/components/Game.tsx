@@ -18,11 +18,12 @@ const Game: FC<GameProps> = ({ uiController, onError }) => {
   const [phase, setPhase] = useState<Phase>('LOADING');
   const [players, setPlayers] = useState<List<Player>>(List());
   const [roundType, setRoundType] = useState<RoundType>('TEXT');
+  const [room, setRoom] = useState<string>('');
   const [prevDescription, setPrevDescription] = useState('');
   const [prevPictureSource, setPrevPictureSource] = useState('');
   const [showcaseItems, setShowcaseItems] = useState<List<ShowcaseItem>>(List());
   const [waiting, setWaiting] = useState(false);
-  uiController.refresh({ setPrevDescription, setPrevPictureSource, setRoundType, setShowcaseItems, showcaseItems, setPhase, setPlayers, setWaiting });
+  uiController.refresh({ setPrevDescription, setPrevPictureSource, setRoom, setRoundType, setShowcaseItems, showcaseItems, setPhase, setPlayers, setWaiting });
 
   const onStartGame = () => {
     startGame();
@@ -30,7 +31,7 @@ const Game: FC<GameProps> = ({ uiController, onError }) => {
 
   return (
     <div id="game-container">
-      { phase === 'LOBBY' && <Lobby {...{ players, onStartGame }}/> }
+      { phase === 'LOBBY' && <Lobby {...{ players, room, onStartGame }}/> }
       { phase === 'LOADING' && <Loading /> }
       { phase === 'CREATE' && <Create {...{ prevDescription, prevPictureSource, onError, roundType, waiting, }} /> }
       { phase === 'SHOW' && <ShowAndTell showcaseItems={showcaseItems} /> }

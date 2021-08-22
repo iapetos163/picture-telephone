@@ -75,7 +75,6 @@ export function connect(bus: EventBus<EventType>): Promise<void> {
     .map((event): [ClientEvent, Symbol] =>
       [event, bus.subscribe(event, data => {
         const message: Message<ClientEvent> = { event, data };
-        console.log('SENDING MESSAGE')
         ws.send(JSON.stringify(message));
       })])
     .fromPairs()
