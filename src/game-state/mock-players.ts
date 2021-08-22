@@ -1,28 +1,35 @@
 import { phrases, images } from './mock-data.json';
 import EventBus from './EventBus';
-import { EventType, JoinData, StartedData } from './events';
+import { EventType, JoinData, RoomData, StartedData } from './events';
 import Session from './Session';
 import { UIController } from '../UIController';
 import * as adapter from '../adapter';
 import LobbySession from './Session/LobbySession';
 
+const ERR_SESSION_UNINIT = new Error('Session not initialized');
 const ERR_ALREADY_STARTED = new Error('Active session received STARTED event');
 const ERR_LOBBY_SUBMIT = new Error('Lobby session received SUBMIT event');
 const ERR_LOBBY_PLAY = new Error('Tried to play round in lobby session');
 
 export default class MockPlayer {
-  private session: Session;
+  private session?: Session;
 
   public static players: MockPlayer[] = [];
 
-  constructor(room: string) {
+  constructor(roomId: string) {
     const bus = new EventBus<EventType>();
-    this.session = new LobbySession(new UIController(true), room, Math.random().toString(), [], bus);
 
     setTimeout(() => {
       adapter.connect(bus).then(() => {
-        bus.publish<JoinData>('JOIN', { room });
+        const subscription = bus.subscribe<RoomData>('ROOM', (room) => {
+          this.session = new LobbySession(new UIController(true), room.id, room.ownPlayer.id, room.allPlayers, bus);
+          bus.unsubscribe('ROOM', subscription);
+        });
+        bus.publish<JoinData>('JOIN', { room: roomId });
         bus.subscribe<StartedData>('STARTED', ({ roundPaths }) => {
+          if (!this.session) {
+            throw ERR_SESSION_UNINIT;
+          }
           if (!Session.isLobby(this.session)) {
             throw ERR_ALREADY_STARTED;
           }
@@ -34,8 +41,14 @@ export default class MockPlayer {
   }
 
   private playRound() {
+    if (!this.session) {
+      throw ERR_SESSION_UNINIT;
+    }
     if (this.session.currentPhase === 'CREATE') {
       setTimeout(() => {
+        if (!this.session) {
+          throw ERR_SESSION_UNINIT;
+        }
         if (!Session.isActive(this.session)) {
           throw ERR_LOBBY_PLAY;
         }
