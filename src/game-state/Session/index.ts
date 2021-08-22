@@ -1,5 +1,6 @@
 import { List} from 'immutable';
 import ActiveSession from './ActiveSession';
+import LobbySession from './LobbySession';
 import { Player, Phase } from '..';
 import EventBus from '../EventBus';
 import { EventType } from '../events';
@@ -29,5 +30,9 @@ export default abstract class Session {
 
   public static isActive(s: Session): s is ActiveSession {
     return s.phase !== 'LOBBY';
+  }
+
+  public static isLobby(s: Session): s is LobbySession {
+    return s.phase === 'LOBBY';
   }
 }

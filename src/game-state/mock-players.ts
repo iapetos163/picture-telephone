@@ -1,16 +1,17 @@
 import { phrases, images } from './mock-data.json';
 import EventBus from './EventBus';
-import { EventType, JoinData } from './events';
+import { EventType, JoinData, StartedData } from './events';
 import Session from './Session';
 import { UIController } from '../UIController';
 import * as adapter from '../adapter';
 import LobbySession from './Session/LobbySession';
 
+const ERR_ALREADY_STARTED = new Error('Active session received STARTED event');
 const ERR_LOBBY_SUBMIT = new Error('Lobby session received SUBMIT event');
 const ERR_LOBBY_PLAY = new Error('Tried to play round in lobby session');
 
 export default class MockPlayer {
-  private readonly session: Session;
+  private session: Session;
 
   public static players: MockPlayer[] = [];
 
@@ -21,16 +22,12 @@ export default class MockPlayer {
     setTimeout(() => {
       adapter.connect(bus).then(() => {
         bus.publish<JoinData>('JOIN', { room });
-        bus.subscribe('START', () => {
-          this.playRound()
-        });
-        bus.subscribe('SUBMIT', () => {
-          if (!Session.isActive(this.session)) {
-            throw ERR_LOBBY_SUBMIT;
+        bus.subscribe<StartedData>('STARTED', ({ roundPaths }) => {
+          if (!Session.isLobby(this.session)) {
+            throw ERR_ALREADY_STARTED;
           }
-          if (!this.session.waiting) {
-            this.playRound();
-          }
+          this.session = this.session.activate(roundPaths);
+          this.playRound();
         });
       });
     }, Math.random() * 3000);
@@ -42,11 +39,14 @@ export default class MockPlayer {
         if (!Session.isActive(this.session)) {
           throw ERR_LOBBY_PLAY;
         }
-        if (this.session.roundType === 'TEXT') {
-          this.session.submitText(phrases[Math.floor(Math.random() * phrases.length)]);
-        } else {
-          this.session.submitPicture(images[Math.floor(Math.random() * images.length)]);
+        if (!this.session.waiting) {
+          if (this.session.roundType === 'TEXT') {
+            this.session.submitText(phrases[Math.floor(Math.random() * phrases.length)]);
+          } else {
+            this.session.submitPicture(images[Math.floor(Math.random() * images.length)]);
+          }
         }
+        this.playRound();
       }, Math.random() * 10000);
     }
   }

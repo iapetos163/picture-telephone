@@ -72,7 +72,8 @@ export function startGame() {
 
 export function activateSession(roundPaths: number[][]) {
   if (Session.isActive(currentSession)) {
-    throw new Error('Cannot activate already active session');
+    // throw new Error('Cannot activate already active session');
+    return;
   }
   currentSession = currentSession.activate(roundPaths);
 }
