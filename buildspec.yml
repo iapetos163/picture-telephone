@@ -2,12 +2,10 @@ version: 0.2
 phases:
   install:
     commands:
-      - npm install -g yarn@berry
-      - yarn plugin import typescript
-      - yarn
+      - npm install
   build:
     commands:
-      - yarn build
+      - npm run build
   post_build:
     commands:
       - rsync -rv dist/ $TARGET_PATH/
