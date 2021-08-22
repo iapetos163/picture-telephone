@@ -1,6 +1,5 @@
 import * as adapter from '../adapter';
 import { UIController } from '../UIController';
-import MockPlayer from './mock-players';
 import Session from './Session';
 import ActiveSession from './Session/ActiveSession';
 import LobbySession from './Session/LobbySession';
@@ -39,7 +38,6 @@ export function createRoom(uic: UIController): Promise<void> {
         currentSession = new LobbySession(uic, room.id, room.ownPlayer.id, room.allPlayers, bus);
         resolve();
         bus.unsubscribe('ROOM', subscription);
-        MockPlayer.initialize(5, room.id);
       });
 
       bus.publish<CreateData>('CREATE', null);
@@ -72,7 +70,7 @@ export function startGame() {
 
 export function activateSession(roundPaths: number[][]) {
   if (Session.isActive(currentSession)) {
-    // throw new Error('Cannot activate already active session');
+    throw new Error('Cannot activate already active session');
     return;
   }
   currentSession = currentSession.activate(roundPaths);
