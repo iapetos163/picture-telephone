@@ -90,6 +90,7 @@ main {
     margin: auto;
 
     canvas {
+      touch-action: none;
       height: 250px;
       width: 350px;
     }
