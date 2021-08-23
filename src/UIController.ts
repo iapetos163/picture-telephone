@@ -51,7 +51,7 @@ export class UIController {
   public clearShowcase() {
     if (this.mock) return;
     if (!this.props) throw UIController.uninitError;
-    const items = List();
+    const items = List<ShowcaseItem>();
     this.props.setShowcaseItems(items);
     this.props.showcaseItems = items;
   }

@@ -52,7 +52,7 @@ const Create: FC<CreateProps> = ({ onError, prevDescription, prevPictureSource, 
                   <div></div>
                   <CanvasContainer {...{ onError, canvasRef }} />
                   <div id="right-bar">
-                      <div className="box-btn">1</div>
+                      {/* <div className="box-btn">1</div>
                       <div className="box-btn">2</div>
                       <div className="box-btn">3</div>
                       <div className="box-btn">4</div>
@@ -65,7 +65,7 @@ const Create: FC<CreateProps> = ({ onError, prevDescription, prevPictureSource, 
                       <div className="box-btn">Lg</div>
                       <div className="box-btn">Med</div>
                       <div className="box-btn">Sm</div>
-                      <div className="box-btn">?</div>
+                      <div className="box-btn">?</div> */}
                   </div>
               </div>
           </div>
