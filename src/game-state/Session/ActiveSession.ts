@@ -79,7 +79,7 @@ export default class ActiveSession extends Session {
 
   private onSubmitPicture(player: number, picture: string) {
     this.pictures[(this.round - 1) / 2][this.roundPaths[this.round][player]] = picture;
-    for (let i = 0; i < this.pictures[0].length ; i++) {
+    for (let i = 0; i < this.numRounds ; i++) {
       if(this.pictures[(this.round - 1) / 2][i] == undefined) {
         return;
       }
