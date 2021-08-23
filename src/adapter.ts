@@ -2,8 +2,8 @@ import _ from 'lodash';
 import { DOMAIN_NAME } from './constants.json';
 import EventBus from './game-state/EventBus';
 
-export type SymmetricEvent = 'SUBMIT';
-export const SYMMETRIC_EVENTS: SymmetricEvent[] = ['SUBMIT'];
+export type SymmetricEvent = 'SUBMIT' | 'NEXT';
+export const SYMMETRIC_EVENTS: SymmetricEvent[] = ['SUBMIT', 'NEXT'];
 export type ClientEvent = 'JOIN' | 'CREATE' | 'START' | SymmetricEvent;
 export const CLIENT_EVENTS: ClientEvent[] = (['JOIN', 'CREATE', 'START'] as ClientEvent[]).concat(SYMMETRIC_EVENTS);
 export type ServerEvent = 'ROOM' | 'STARTED' | 'ERROR' | SymmetricEvent;

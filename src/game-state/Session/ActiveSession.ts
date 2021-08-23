@@ -79,7 +79,8 @@ export default class ActiveSession extends Session {
 
   private onSubmitPicture(player: number, picture: string) {
     this.pictures[(this.round - 1) / 2][this.roundPaths[this.round][player]] = picture;
-    for (let i = 0; i < this.pictures[0].length ; i++) {
+    console.log('onSubmitPicture', this.pictures[(this.round - 1) / 2])
+    for (let i = 0; i < this.numRounds ; i++) {
       if(this.pictures[(this.round - 1) / 2][i] == undefined) {
         return;
       }
@@ -111,6 +112,7 @@ export default class ActiveSession extends Session {
         }
       }
     } else {
+      this.bus.publish<NextData>('NEXT', null);
       if (++this.round === this.numRounds) {
         this.round = 0;
         this.ui.clearShowcase();
