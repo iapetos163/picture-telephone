@@ -1,3 +1,5 @@
+@use "sass:math";
+
 @import "~bootswatch/dist/cyborg/variables";
 @import 'bootstrap';
 @import "~bootswatch/dist/cyborg/bootswatch";
@@ -15,8 +17,8 @@ $sm-inner-canvas-container: 280px;
 .box-btn {
   border: none;
   background: darkgoldenrod;
-  flex: $sm-inner-canvas-container / 7;
-  width: $sm-inner-canvas-container / 7;
+  flex: math.div($sm-inner-canvas-container, 7);
+  width: math.div($sm-inner-canvas-container, 7);
 }
 
 nav {
@@ -98,7 +100,7 @@ main {
   
   >div#right-bar {
     display: flex;
-    width: $sm-inner-canvas-container * 2 / 7;
+    width: math.div($sm-inner-canvas-container * 2, 7);
     flex-flow: column wrap;
     height: 100%;
   }
