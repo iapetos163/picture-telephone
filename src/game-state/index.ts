@@ -81,5 +81,5 @@ export function showNext() {
   if(!Session.isActive(currentSession) || currentSession.currentPhase !== 'SHOW') {
     throw new Error('Cannot show next outside of show and tell');
   }
-  currentSession.nextRound();
+  currentSession.showNext();
 }

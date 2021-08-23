@@ -1,8 +1,10 @@
 import Session from '.';
 import { Player, RoundType, Phase } from '..';
 import EventBus from '../EventBus';
-import { EventType, SubmitData } from '../events';
+import { EventType, NextData, SubmitData } from '../events';
 import { UIController } from '../../UIController';
+
+const ERR_NEXT = new Error('Received NEXT message outside of SHOW phase');
 
 // web socket lives here
 export default class ActiveSession extends Session {
@@ -33,6 +35,11 @@ export default class ActiveSession extends Session {
       }
     })
 
+    this.bus.subscribe('NEXT', () => {
+      if (this.phase !== 'SHOW') throw ERR_NEXT;
+      this.onNextRound();
+    });
+
     for (let i = 0; i < this.numRounds; i++) {
       if (i % 2 === 0) {
         this.texts[i / 2] = new Array(Math.ceil(this.numRounds / 2));
@@ -45,6 +52,10 @@ export default class ActiveSession extends Session {
 
   public get roundType(): RoundType {
     return this.round % 2 === 0 ? 'TEXT' : 'PICTURE';
+  }
+
+  public showNext() {
+    this.bus.publish<NextData>('NEXT', null);
   }
 
   public submitText(text: string) {
@@ -74,7 +85,7 @@ export default class ActiveSession extends Session {
         return;
       }
     }
-    this.nextRound();
+    this.onNextRound();
   }
 
   private onSubmitPicture(player: number, picture: string) {
@@ -84,10 +95,10 @@ export default class ActiveSession extends Session {
         return;
       }
     }
-    this.nextRound();
+    this.onNextRound();
   }
 
-  public nextRound() {
+  public onNextRound() {
     this.waiting = false;
     this.ui.showDoneButton();
     if (this.phase === 'CREATE') {
