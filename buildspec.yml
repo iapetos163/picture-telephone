@@ -5,6 +5,7 @@ phases:
       - npm install
   build:
     commands:
+      - cp src/constants.prod.json src/constants.json
       - npm run build
   post_build:
     commands:
