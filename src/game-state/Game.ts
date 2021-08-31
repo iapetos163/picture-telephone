@@ -1,33 +1,40 @@
-import Session from '.';
-import { Player, RoundType, Phase } from '..';
-import EventBus from '../EventBus';
-import { EventType, NextData, SubmitData } from '../events';
-import { UIController } from '../../UIController';
+import { RoundType, Phase } from '.';
+import EventBus, { Subscription } from './EventBus';
+import { EventType, NextData, SubmitData } from './events';
+import { UIController } from '../UIController';
 
 const ERR_NEXT = new Error('Received NEXT message outside of SHOW phase');
 
-// web socket lives here
-export default class ActiveSession extends Session {
+/**
+ * Represents one Game within a session
+ */
+export default class Game {
+  private readonly bus: EventBus<EventType>;
+  private readonly ui: UIController;
+
   private readonly numRounds: number;
   private readonly playerIndex: number;
   private readonly texts: string[][] = []; // [round/2][path]
   private readonly pictures: string[][] = []; // [round-1/2][path]
   private readonly roundPaths: number[][]; // [round][player] = path
+  private readonly onFinished: () => void;
+  private readonly submitSubscription: Subscription;
+  private readonly nextSubscription: Subscription;
   private round = 0;
   private showingPath = 0;
-  protected phase: Phase;
-  public waiting = false;
+  private _phase: Phase;
+  private waiting = false;
 
-  constructor(uiController: UIController, roomCode: string, playerID: string, players: Player[], bus: EventBus<EventType>, roundPaths: number[][]) {
-    super(uiController, roomCode, playerID, players, bus);
-
-    const playerIndex = this.players.findIndex(p => p.id === this.playerID)
+  constructor(uiController: UIController, bus: EventBus<EventType>, playerIndex: number, roundPaths: number[][], onFinished: () => void) {
+    this.ui = uiController;
+    this.bus = bus;
     this.playerIndex = playerIndex;
-    this.numRounds = this.players.length;
+    this.numRounds = roundPaths.length;
     this.roundPaths = roundPaths;
-    this.phase = 'CREATE';
+    this.onFinished = onFinished;
+    this._phase = 'CREATE';
 
-    this.bus.subscribe<SubmitData>('SUBMIT', ({ playerIndex, type, data }) => {
+    this.submitSubscription = this.bus.subscribe<SubmitData>('SUBMIT', ({ playerIndex, type, data }) => {
       if (type === 'TEXT') {
         this.onSubmitText(playerIndex, data);
       } else {
@@ -35,8 +42,8 @@ export default class ActiveSession extends Session {
       }
     })
 
-    this.bus.subscribe('NEXT', () => {
-      if (this.phase !== 'SHOW') throw ERR_NEXT;
+    this.nextSubscription = this.bus.subscribe('NEXT', () => {
+      if (this._phase !== 'SHOW') throw ERR_NEXT;
       this.onNextRound();
     });
 
@@ -78,6 +85,10 @@ export default class ActiveSession extends Session {
     });
   }
 
+  public get phase() {
+    return this._phase;
+  }
+
   private onSubmitText(player: number, text: string) {
     this.texts[this.round / 2][this.roundPaths[this.round][player]] = text;
     for (let i = 0; i < this.numRounds ; i++) {
@@ -98,15 +109,15 @@ export default class ActiveSession extends Session {
     this.onNextRound();
   }
 
-  public onNextRound() {
+  private onNextRound() {
     this.waiting = false;
     this.ui.showDoneButton();
-    if (this.phase === 'CREATE') {
+    if (this._phase === 'CREATE') {
       if (++this.round === this.numRounds) {
         this.round = 0;
         this.showingPath = 0;
         this.ui.showcaseText(this.texts[0][0]);
-        this.phase = 'SHOW';
+        this._phase = 'SHOW';
         this.ui.displayPhase('SHOW');
       } else if (this.round % 2 === 0) {
         if (this.round > 0) {
@@ -126,9 +137,7 @@ export default class ActiveSession extends Session {
         this.round = 0;
         this.ui.clearShowcase();
         if (++this.showingPath===this.numRounds) {
-          this.ui.showTextArea();
-          this.phase = 'CREATE';
-          this.ui.displayPhase('CREATE');
+          this.tearDown();
           return;
         }
       }
@@ -138,5 +147,11 @@ export default class ActiveSession extends Session {
         this.ui.showcasePicture(this.pictures[(this.round - 1) / 2][this.showingPath]);
       }
     }
+  }
+
+  private tearDown() {
+    this.bus.unsubscribe('SUBMIT', this.submitSubscription);
+    this.bus.unsubscribe('NEXT', this.nextSubscription);
+    this.onFinished();
   }
 }

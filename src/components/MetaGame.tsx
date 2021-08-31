@@ -8,13 +8,13 @@ import ShowAndTell from './ShowAndTell';
 import { ShowcaseItem, UIController } from '../UIController';
 import { startGame } from '../game-state';
 
-interface GameProps {
+interface MetaGameProps {
   onError(message: string | Error | ErrorEvent): void;
   uiController: UIController;
 }
 
 
-const Game: FC<GameProps> = ({ uiController, onError }) => {
+const MetaGame: FC<MetaGameProps> = ({ uiController, onError }) => {
   const [phase, setPhase] = useState<Phase>('LOADING');
   const [players, setPlayers] = useState<List<Player>>(List());
   const [roundType, setRoundType] = useState<RoundType>('TEXT');
@@ -38,4 +38,4 @@ const Game: FC<GameProps> = ({ uiController, onError }) => {
     </div>
   );
 }
-export default Game;
+export default MetaGame;
